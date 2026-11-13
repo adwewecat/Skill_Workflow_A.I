@@ -1,0 +1,6 @@
+{
+  "name": "skill-workflow-ai",
+  "description": "Standard AI engineering workflow combining obra/superpowers and mattpocock/skills",
+  "version": "1.0.0",
+  "contextFileName": "GEMINI.md"
+}

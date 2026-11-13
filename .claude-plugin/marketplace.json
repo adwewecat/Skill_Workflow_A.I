@@ -1,0 +1,24 @@
+{
+  "name": "skill-workflow-ai",
+  "owner": {
+    "name": "adwewecat",
+    "url": "https://github.com/adwewecat/Skill_Workflow_A.I"
+  },
+  "description": "Standard AI engineering workflow combining obra/superpowers and mattpocock/skills.",
+  "plugins": [
+    {
+      "name": "skill-workflow-ai",
+      "source": "./",
+      "description": "Auto-on Superpowers backbone + manual Matt Pocock milestone tools + context/Git discipline.",
+      "category": "engineering",
+      "keywords": [
+        "superpowers",
+        "tdd",
+        "subagents",
+        "verification",
+        "grilling",
+        "domain-modeling"
+      ]
+    }
+  ]
+}

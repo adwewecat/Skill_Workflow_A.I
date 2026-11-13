@@ -1,0 +1,23 @@
+# Project Name
+
+> Brief description of what this project does.
+
+## Setup & Installation
+
+```bash
+# TODO: Add install commands (e.g., npm install / pip install -r requirements.txt)
+```
+
+## Running & Testing
+
+```bash
+# TODO: Add dev/start commands
+
+# TODO: Add test/lint/build commands
+```
+
+## Project Docs
+
+- `GEMINI.md` — Core architecture, tech stack, commands, and workflow rules
+- `PROGRESS.md` — Latest 10 development milestones and next steps
+- `ARCHIVE.md` — Historical milestones rotated from `PROGRESS.md`

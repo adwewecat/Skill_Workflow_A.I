@@ -1,0 +1,10 @@
+# Project Progress
+
+> **Rotation Rule:** Prepend new entries to the top of **Recent Milestones**. Keep at most **10 entries** here; move older entries (#11+) to `ARCHIVE.md`.
+
+## Recent Milestones
+
+- **[YYYY-MM-DD] Workflow initialized**
+  - **Done:** Integrated `Skill_Workflow_A.I` (`obra/superpowers` + `mattpocock/skills` + project memory/git rules).
+  - **Issues Fixed:** None yet.
+  - **Next:** Inspect project requirements and begin first task using Superpowers workflow.

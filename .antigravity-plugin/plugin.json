@@ -1,0 +1,18 @@
+{
+  "name": "skill-workflow-ai",
+  "displayName": "Skill Workflow AI",
+  "version": "1.0.0",
+  "description": "Unified engineering workflow combining obra/superpowers (automatic subagents, TDD, verification) with mattpocock/skills (manual milestone tools) and project memory/Git rules.",
+  "logo": "assets/antigravity-logo.png",
+  "suggestedPrompts": [
+    "Integrate Skill_Workflow_A.I into this project and initialize missing root docs",
+    "Plan and implement a new feature using Superpowers TDD and verification",
+    "Run /grill-with-docs to lock new architecture decisions into GLOSSARY.md and ADRs"
+  ],
+  "author": {
+    "name": "adwewecat",
+    "url": "https://github.com/adwewecat/Skill_Workflow_A.I"
+  },
+  "homepage": "https://github.com/adwewecat/Skill_Workflow_A.I",
+  "repository": "https://github.com/adwewecat/Skill_Workflow_A.I"
+}
