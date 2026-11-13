@@ -1,7 +1,6 @@
 ---
 name: wizard
-description: Manual interactive bash setup wizard generator for human-only steps (.env, secrets, third-party setup). Note — for end-of-session handoff docs, use /handoff.
-disable-model-invocation: true
+description: "Manual trigger ONLY — run ONLY when the user explicitly chats 'cau hinh' (or invokes /wizard). Generates an interactive bash wizard that walks the user step-by-step through manual off-code setup (.env, API keys, GitHub Secrets, environment configuration)."
 ---
 
 # Wizard

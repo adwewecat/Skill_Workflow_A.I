@@ -134,3 +134,4 @@ if ($WithPointers) {
 Write-Host ""
 Write-Host "Integration complete in: $TargetRoot"
 Write-Host "Next step for AI: Inspect project manifest/structure (without bulk-reading .md files) and fill TODO slots in GEMINI.md / README.md."
+

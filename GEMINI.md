@@ -26,9 +26,10 @@
 
 ### 2. Execution Workflow
 - **Main Backbone (`obra/superpowers` — Auto-On):** Follow for every task: load `using-superpowers` -> `brainstorming` / `writing-plans` -> split work into independent tasks -> dispatch fresh-context subagents per task (`subagent-driven-development` / `dispatching-parallel-agents`) -> strict RED-GREEN-REFACTOR `test-driven-development` -> run `verification-before-completion` with real command output before claiming success.
-- **Manual / Milestone Tools (`mattpocock/skills` — Manual Only):** Never auto-trigger on routine tasks. Run only when explicitly invoked or at major milestones:
-  - `/grill-with-docs`: Lock new rules, domain terms (`GLOSSARY.md`), and architecture decisions (`docs/adr/`).
-  - `/handoff`: Package end-of-session handoff summary + rotate `PROGRESS.md`. *(Note: upstream `/wizard` creates interactive bash setup scripts for `.env`/secrets/infra; if `/wizard` is invoked specifically for end-of-session handoff documentation, run `/handoff` + `PROGRESS.md` wrap-up instead.)*
+- **Manual / Milestone Tools (`mattpocock/skills` — Manual Only):** Never auto-trigger on routine tasks. Run ONLY when the user chats one of these exact trigger phrases (or invokes the matching slash command):
+  - **`quy trinh moi`** *(skill `grill-with-docs` — use when initializing a project or adding a major feature)*: Act as a strict reviewer, ask one question at a time on business logic and input/output until zero ambiguity remains, then lock canonical terms in `GLOSSARY.md` and decisions in `docs/adr/`. Never auto-trigger on routine bugfixes.
+  - **`nghi ngoi`** *(skill `handoff` — use at end of workday or when chat gets long)*: Summarize completed work at the top of `PROGRESS.md` (keep max 10 entries; move older entries #11+ to `ARCHIVE.md`) and write clear handoff instructions for the next session.
+  - **`cau hinh`** *(skill `wizard` — use for off-code manual setup)*: Generate an interactive terminal bash script guiding the user step-by-step to configure `.env`, API keys, GitHub Secrets, or environment setup.
 
 ### 3. Clean Code & Git / GitHub Standards
 - **Clean Code:** Immediately delete unused variables, functions, imports, and dead files. Comment only **WHY** (non-obvious invariants, edge cases, special error handling); never comment obvious code.
@@ -37,3 +38,4 @@
   - `git commit` locally only after finishing and verifying each task.
   - `git push` to GitHub right after completing a full feature, a complete bugfix, or before ending a session — always inspect `git status` and staged diff first to ensure no `.env`, secrets, keys, or credentials are included.
 <!-- skill-workflow-ai:end -->
+

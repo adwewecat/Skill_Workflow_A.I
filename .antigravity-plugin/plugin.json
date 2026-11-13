@@ -7,7 +7,7 @@
   "suggestedPrompts": [
     "Integrate Skill_Workflow_A.I into this project and initialize missing root docs",
     "Plan and implement a new feature using Superpowers TDD and verification",
-    "Run /grill-with-docs to lock new architecture decisions into GLOSSARY.md and ADRs"
+    "Run 'quy trinh moi' to lock new architecture decisions into GLOSSARY.md and ADRs"
   ],
   "author": {
     "name": "adwewecat",
@@ -16,3 +16,4 @@
   "homepage": "https://github.com/adwewecat/Skill_Workflow_A.I",
   "repository": "https://github.com/adwewecat/Skill_Workflow_A.I"
 }
+

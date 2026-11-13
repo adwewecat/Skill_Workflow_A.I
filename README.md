@@ -8,11 +8,15 @@ Repo này kết hợp hai bộ skill chuẩn MIT cùng quy tắc quản lý ng�
    - Khởi động với `using-superpowers`, `brainstorming`, `writing-plans`.
    - Chia nhỏ yêu cầu thành các task độc lập, mở subagent sạch ngữ cảnh cho từng task (`subagent-driven-development`, `dispatching-parallel-agents`).
    - Tuân thủ TDD nghiêm ngặt (`test-driven-development`) và kiểm chứng đầu ra thực tế (`verification-before-completion`) trước khi báo hoàn thành.
-2. **Công cụ gọi tay (`mattpocock/skills` — Chỉ chạy khi gọi lệnh hoặc cuối cột mốc):**
-   - Đã khóa/khoanh vùng các skill trùng vai trò (`tdd`, `code-review`, `diagnosing-bugs`, `pr`, `wizard`, v.v.) để không đè luồng tự động của `superpowers`.
-   - `/grill-with-docs`: phỏng vấn thiết kế và chốt quy tắc/thuật ngữ/kiến trúc vào `GLOSSARY.md` và `docs/adr/`.
-   - `/handoff`: đóng gói tài liệu bàn giao cuối phiên cho phiên/agent tiếp theo (kèm xoay vòng `PROGRESS.md`).
-   - `/wizard`: tạo bash script tương tác hướng dẫn thao tác tay (`.env`, API key, GitHub secrets, hạ tầng).
+2. **Công cụ gọi tay (`mattpocock/skills` — Chỉ chạy khi bạn chat lệnh kích hoạt):**
+   - Đã khóa/khoanh vùng các skill trùng vai trò (`tdd`, `code-review`, `diagnosing-bugs`, `pr`, v.v.) để không đè luồng tự động của `superpowers`.
+   - Chat **`quy trinh moi`** *(thay cho `/grill-with-docs` — Dùng lúc mới khởi tạo dự án hoặc thêm tính năng lớn)*:
+     - **Cơ chế:** Khi bạn chat `"quy trinh moi"`, AI sẽ đóng vai người thẩm định, hỏi vặn lại bạn từng câu một về logic nghiệp vụ, dữ liệu đầu vào/ra cho đến khi không còn điểm mờ nào, sau đó tự chốt lại thành tài liệu chuẩn trong `GLOSSARY.md` và `docs/adr/`.
+     - **Lý do phải gọi tay:** Nếu để tự động, mỗi lần bạn nhờ sửa một lỗi nhỏ AI cũng sẽ dừng lại để "phỏng vấn" bạn rất mất thời gian.
+   - Chat **`nghi ngoi`** *(thay cho `/handoff` — Dùng ở cuối buổi làm việc hoặc khi chat đã quá dài)*:
+     - **Cơ chế:** Khi chuẩn bị tắt IDE nghỉ ngơi hoặc thấy AI bắt đầu phản hồi chậm do lịch sử chat dài, bạn chat `"nghi ngoi"`. AI sẽ tự động tóm tắt toàn bộ việc vừa làm, ghi vào đầu file `PROGRESS.md`, đẩy các mốc cũ hơn 10 mốc sang `ARCHIVE.md` và viết sẵn hướng dẫn cho phiên làm việc ngày hôm sau.
+   - Chat **`cau hinh`** *(thay cho `/wizard` — Dùng khi cần cấu hình các thứ bên ngoài code)*:
+     - **Cơ chế:** Dành cho các thao tác AI không thể tự bấm thay bạn như tạo file `.env`, lấy API Key, cấu hình GitHub Secrets hoặc cài đặt môi trường. Khi bạn chat `"cau hinh"`, AI sẽ sinh ra một đoạn bash script tương tác chạy trên terminal để dẫn dắt bạn nhập từng thông số cho đến khi hoàn tất.
 3. **Quản lý trí nhớ & Tiêu chuẩn Git:**
    - Mở phiên chỉ đọc `GEMINI.md` và `PROGRESS.md` (không tự ý đọc lan man các `.md` khác).
    - Tự kiểm tra và tạo nếu thiếu 4 file gốc: `.gitignore`, `README.md`, `GEMINI.md` (< 300 dòng), `PROGRESS.md`.
@@ -26,7 +30,7 @@ Repo này kết hợp hai bộ skill chuẩn MIT cùng quy tắc quản lý ng�
 Copy nguyên văn đoạn dưới đây gửi cho A.I ngay lần chat đầu tiên trong dự án bất kỳ:
 
 ```text
-Hãy đọc hướng dẫn tại https://github.com/adwewecat/Skill_Workflow_A.I.git (file INSTALL.md), tích hợp toàn bộ bộ skill (khung xương tự động obra/superpowers + công cụ gọi tay mattpocock/skills) và thiết lập/cập nhật không ghi đè 4 file chuẩn (.gitignore, README.md, GEMINI.md dưới 300 dòng, PROGRESS.md giữ tối đa 10 mốc xoay vòng sang ARCHIVE.md) vào dự án này; sau đó quét nhanh tech stack và cấu trúc code để điền GEMINI.md, xóa thư mục tạm nếu có, và từ giờ tuân thủ nghiêm ngặt quy trình đọc phân tầng (chỉ đọc GEMINI.md + PROGRESS.md khi mở phiên), TDD, subagent độc lập, verification trước khi kết luận và tiêu chuẩn Git trong GEMINI.md.
+Hãy đọc hướng dẫn tại https://github.com/adwewecat/Skill_Workflow_A.I.git (file INSTALL.md), tích hợp toàn bộ bộ skill (khung xương tự động obra/superpowers + công cụ gọi tay mattpocock/skills kích hoạt theo từ khóa chat "quy trinh moi", "nghi ngoi", "cau hinh") và thiết lập/cập nhật không ghi đè 4 file chuẩn (.gitignore, README.md, GEMINI.md dưới 300 dòng, PROGRESS.md giữ tối đa 10 mốc xoay vòng sang ARCHIVE.md) vào dự án này; sau đó quét nhanh cấu trúc code và manifest để điền thông tin thật vào GEMINI.md (không tự ý đọc lan man các file .md khác), xóa thư mục clone tạm nếu có, và từ giờ tuân thủ nghiêm ngặt quy trình đọc phân tầng (chỉ đọc GEMINI.md + PROGRESS.md khi mở phiên), TDD, subagent độc lập, verification trước khi báo hoàn thành và tiêu chuẩn Git trong GEMINI.md.
 ```
 
 ---

@@ -45,4 +45,8 @@ What the installer does:
 
 1. Remove `$tmp`.
 2. Check `git status` (warn if an existing `.gitignore` lacks `.env` or secret ignores).
-3. Activate `using-superpowers` immediately for all subsequent tasks.
+3. From the next turn onward, follow `GEMINI.md` and `PROGRESS.md` strictly:
+   - Read ONLY `GEMINI.md` and `PROGRESS.md` on session start.
+   - Auto-run `obra/superpowers` (`using-superpowers` -> `brainstorming` -> `writing-plans` -> `subagent-driven-development` -> `test-driven-development` -> `verification-before-completion`).
+   - Run `mattpocock/skills` ONLY on explicit manual chat triggers: `"quy trinh moi"` (`grill-with-docs`), `"nghi ngoi"` (`handoff`), `"cau hinh"` (`wizard`).
+

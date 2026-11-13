@@ -1,5 +1,3 @@
 interface:
-  display_name: "Grill with Docs"
-  short_description: "Grill a design and write its docs"
-policy:
-  allow_implicit_invocation: false
+  display_name: "Grill with Docs (quy trinh moi)"
+  short_description: "Trigger via chat 'quy trinh moi' or /grill-with-docs"

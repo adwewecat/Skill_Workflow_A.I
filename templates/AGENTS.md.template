@@ -3,3 +3,4 @@
 On session start, read **ONLY** `GEMINI.md` and `PROGRESS.md` (do not bulk-read other `.md` files unless specified in the current task or loaded as a triggered skill).
 
 Follow all architecture, memory, workflow (`obra/superpowers` auto + `mattpocock/skills` manual), clean-code, and Git rules defined in `GEMINI.md`.
+
