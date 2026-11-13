@@ -1,12 +1,13 @@
 <#
 .SYNOPSIS
-    Integrates Skill_Workflow_A.I (skills + memory/git rules) into a target project safely.
+    Integrates Skill_Workflow_A.I (skills + MCP servers + memory/git rules) into a target project safely.
 .DESCRIPTION
     Idempotent installer for both new and existing projects.
     - Installs/updates the 42 workflow skills into .agents/skills/ (and .claude/skills/ if detected or requested)
       without removing existing custom skills in the target project.
     - Creates missing root files (.gitignore, README.md, GEMINI.md, PROGRESS.md) without overwriting existing ones.
     - Safely injects/updates the Skill_Workflow_A.I rules block in an existing GEMINI.md using HTML markers.
+    - Non-destructively merges playwright, private-journal, and context7 MCP servers into ~/.gemini/config/mcp_config.json (and .mcp.json when Claude harness is active) unless -SkipMcp is set.
 #>
 [CmdletBinding()]
 param(
@@ -16,7 +17,9 @@ param(
     [ValidateSet("auto", "agents", "claude", "all")]
     [string]$Harness = "auto",
 
-    [switch]$WithPointers
+    [switch]$WithPointers,
+
+    [switch]$SkipMcp
 )
 
 $ErrorActionPreference = "Stop"
@@ -61,6 +64,9 @@ if (-not (Test-Path $gitignorePath)) {
     $giContent = Get-Content $gitignorePath -Raw -ErrorAction SilentlyContinue
     if ($giContent -notmatch '(?m)^\s*\.env\b') {
         Write-Warning ".gitignore exists but does not explicitly ignore '.env'. Review it before committing."
+    }
+    if ($giContent -notmatch '(?m)^\s*\.private-journal/?\s*$') {
+        Write-Warning ".gitignore exists but does not ignore '.private-journal/'. Add it to avoid committing local journal caches."
     }
 }
 
@@ -129,6 +135,69 @@ if ($WithPointers) {
         Copy-Item (Join-Path $TemplatesDir "CLAUDE.md.template") $claudeMd
         Write-Host "[CREATED] CLAUDE.md pointer"
     }
+}
+
+function Merge-McpConfig {
+    param(
+        [string]$TemplatePath,
+        [string]$DestPath
+    )
+    $destDir = Split-Path -Parent $DestPath
+    New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+
+    if (-not (Test-Path $DestPath)) {
+        Copy-Item $TemplatePath $DestPath
+        Write-Host "[CREATED] MCP config -> $DestPath"
+        return
+    }
+
+    try {
+        $tplObj = (Get-Content $TemplatePath -Raw -Encoding UTF8) | ConvertFrom-Json
+        $rawDest = Get-Content $DestPath -Raw -Encoding UTF8
+        if ([string]::IsNullOrWhiteSpace($rawDest)) {
+            $destObj = [PSCustomObject]@{}
+        } else {
+            $destObj = $rawDest | ConvertFrom-Json
+        }
+    } catch {
+        Write-Warning "Could not parse existing JSON in '$DestPath' ($($_.Exception.Message)). Manually merge '$TemplatePath'."
+        return
+    }
+
+    if (-not ($destObj.PSObject.Properties.Name -contains "mcpServers") -or $null -eq $destObj.mcpServers) {
+        $destObj | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+
+    $existingServers = $destObj.mcpServers.PSObject.Properties.Name
+    $added = @()
+    foreach ($prop in $tplObj.mcpServers.PSObject.Properties) {
+        if ($prop.Name -notin $existingServers) {
+            $destObj.mcpServers | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
+            $added += $prop.Name
+        }
+    }
+
+    if ($added.Count -gt 0) {
+        $json = ($destObj | ConvertTo-Json -Depth 10) + "`n"
+        [System.IO.File]::WriteAllText($DestPath, $json, [System.Text.UTF8Encoding]::new($false))
+        Write-Host "[MERGED] Added MCP servers ($($added -join ', ')) -> $DestPath"
+    } else {
+        Write-Host "[SKIP] MCP config already contains all workflow servers -> $DestPath"
+    }
+}
+
+# 5. Global Antigravity MCP config (+ project .mcp.json when Claude harness is active)
+if (-not $SkipMcp) {
+    $mcpTemplatePath = Join-Path $TemplatesDir "mcp_config.json.template"
+    $userHome = if ($env:USERPROFILE) { $env:USERPROFILE } elseif ($env:HOME) { $env:HOME } else { [Environment]::GetFolderPath("UserProfile") }
+    $globalMcpPath = Join-Path $userHome ".gemini\config\mcp_config.json"
+    Merge-McpConfig -TemplatePath $mcpTemplatePath -DestPath $globalMcpPath
+
+    if ($installClaude) {
+        Merge-McpConfig -TemplatePath $mcpTemplatePath -DestPath (Join-Path $TargetRoot ".mcp.json")
+    }
+} else {
+    Write-Host "[SKIP] MCP config installation skipped (-SkipMcp)"
 }
 
 Write-Host ""

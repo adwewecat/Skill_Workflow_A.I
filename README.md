@@ -19,9 +19,13 @@ Repo này kết hợp hai bộ skill chuẩn MIT cùng quy tắc quản lý ng�
      - **Cơ chế:** Dành cho các thao tác AI không thể tự bấm thay bạn như tạo file `.env`, lấy API Key, cấu hình GitHub Secrets hoặc cài đặt môi trường. Khi bạn chat `"cau hinh"`, AI sẽ sinh ra một đoạn bash script tương tác chạy trên terminal để dẫn dắt bạn nhập từng thông số cho đến khi hoàn tất.
 3. **Quản lý trí nhớ & Tiêu chuẩn Git:**
    - Mở phiên chỉ đọc `GEMINI.md` và `PROGRESS.md` (không tự ý đọc lan man các `.md` khác).
-   - Tự kiểm tra và tạo nếu thiếu 4 file gốc: `.gitignore`, `README.md`, `GEMINI.md` (< 300 dòng), `PROGRESS.md`.
+   - Tự kiểm tra và tạo nếu thiếu 4 file gốc: `.gitignore` (chặn `.env`, `.private-journal/`, build/log), `README.md`, `GEMINI.md` (< 300 dòng), `PROGRESS.md`.
    - Xoay vòng `PROGRESS.md` giữ tối đa 10 mốc gần nhất; mốc cũ chuyển sang `ARCHIVE.md`.
    - Code sạch (xóa code/import/file thừa, comment giải thích **WHY**), kiểm thử qua mới `commit`, xong tính năng/fix/cuối phiên mới `push` (rà soát không lộ file nhạy cảm).
+4. **3 MCP Server bổ trợ (Cài tự động vào `~/.gemini/config/mcp_config.json`):**
+   - **`playwright` (`microsoft/playwright-mcp`):** Điều khiển trình duyệt nhẹ qua cây Accessibility để mở localhost, bấm thử nút, đọc log Console/lỗi render ngay trong bước `verification-before-completion` trước khi `git commit`.
+   - **`private-journal` (`obra/superpowers-marketplace` / `private-journal-mcp`):** Sổ tay ngữ nghĩa cục bộ lưu xuyên dự án (môi trường, mẹo debug, bài học kiến trúc) tại `~/.private-journal/`, tránh AI quên kinh nghiệm khi sang repo mới (`.private-journal/` cục bộ được gitignore sẵn).
+   - **`context7` (`upstash/context7`):** Tự động kéo docs và ví dụ API mới nhất của thư viện bên thứ ba vào ngữ cảnh kèm quy tắc cứng trong `GEMINI.md`: *"Luôn gọi Context7 để tra cứu API trước khi viết code tích hợp thư viện ngoài"*.
 
 ---
 
@@ -30,7 +34,7 @@ Repo này kết hợp hai bộ skill chuẩn MIT cùng quy tắc quản lý ng�
 Copy nguyên văn đoạn dưới đây gửi cho A.I ngay lần chat đầu tiên trong dự án bất kỳ:
 
 ```text
-Hãy đọc hướng dẫn tại https://github.com/adwewecat/Skill_Workflow_A.I.git (file INSTALL.md), tích hợp toàn bộ bộ skill (khung xương tự động obra/superpowers + công cụ gọi tay mattpocock/skills kích hoạt theo từ khóa chat "quy trinh moi", "nghi ngoi", "cau hinh") và thiết lập/cập nhật không ghi đè 4 file chuẩn (.gitignore, README.md, GEMINI.md dưới 300 dòng, PROGRESS.md giữ tối đa 10 mốc xoay vòng sang ARCHIVE.md) vào dự án này; sau đó quét nhanh cấu trúc code và manifest để điền thông tin thật vào GEMINI.md (không tự ý đọc lan man các file .md khác), xóa thư mục clone tạm nếu có, và từ giờ tuân thủ nghiêm ngặt quy trình đọc phân tầng (chỉ đọc GEMINI.md + PROGRESS.md khi mở phiên), TDD, subagent độc lập, verification trước khi báo hoàn thành và tiêu chuẩn Git trong GEMINI.md.
+Hãy đọc hướng dẫn tại https://github.com/adwewecat/Skill_Workflow_A.I.git (file INSTALL.md), tích hợp toàn bộ bộ skill (khung xương tự động obra/superpowers + công cụ gọi tay mattpocock/skills kích hoạt theo từ khóa chat "quy trinh moi", "nghi ngoi", "cau hinh"), cấu hình không ghi đè 3 MCP server (playwright, private-journal, context7) vào MCP config toàn cục, và thiết lập/cập nhật không ghi đè 4 file chuẩn (.gitignore có chặn .env và .private-journal/, README.md, GEMINI.md dưới 300 dòng, PROGRESS.md giữ tối đa 10 mốc xoay vòng sang ARCHIVE.md) vào dự án này; sau đó quét nhanh cấu trúc code và manifest để điền thông tin thật vào GEMINI.md (không tự ý đọc lan man các file .md khác), xóa thư mục clone tạm nếu có, và từ giờ tuân thủ nghiêm ngặt quy trình đọc phân tầng (chỉ đọc GEMINI.md + PROGRESS.md khi mở phiên), gọi Context7 tra cứu API trước khi viết code tích hợp thư viện ngoài, TDD, subagent độc lập, verification (gồm Playwright MCP cho giao diện web) trước khi báo hoàn thành và tiêu chuẩn Git trong GEMINI.md.
 ```
 
 ---
@@ -71,9 +75,9 @@ agy plugin install https://github.com/adwewecat/Skill_Workflow_A.I.git
 | Thư mục / File | Vai trò |
 | :--- | :--- |
 | `skills/` | 42 skills phẳng (15 từ `obra/superpowers` + 27 từ `mattpocock/skills`) |
-| `templates/` | File mẫu `.gitignore`, `README.md`, `GEMINI.md`, `PROGRESS.md`, `ARCHIVE.md`, `AGENTS.md`, `CLAUDE.md` |
-| `scripts/` | Script cài đặt không ghi đè cho Windows (`install.ps1`) và Unix (`install.sh`) |
+| `templates/` | File mẫu `.gitignore`, `README.md`, `GEMINI.md`, `PROGRESS.md`, `ARCHIVE.md`, `AGENTS.md`, `CLAUDE.md`, `mcp_config.json` |
+| `scripts/` | Script cài đặt không ghi đè cho Windows (`install.ps1`) và Unix (`install.sh`), tự gộp MCP server an toàn |
 | `INSTALL.md` | Hướng dẫn chuẩn từng bước để A.I tự đọc và tích hợp |
-| `hooks/`, `assets/` | Hook khởi động `using-superpowers` và icon plugin |
+| `mcp_config.json`, `hooks/`, `assets/` | Cấu hình 3 MCP server (`playwright`, `private-journal`, `context7`), hook `using-superpowers` và icon plugin |
 | `.antigravity-plugin/`, `.claude-plugin/`, `gemini-extension.json` | Manifest tương thích đa công cụ A.I |
 | `licenses/` | Bản quyền MIT gốc của `obra/superpowers` và `mattpocock/skills` |

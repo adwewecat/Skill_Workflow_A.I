@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Idempotent installer for Skill_Workflow_A.I into a new or existing project.
 # Usage:
-#   bash scripts/install.sh [TARGET_DIR] [--harness auto|agents|claude|all] [--with-pointers]
+#   bash scripts/install.sh [TARGET_DIR] [--harness auto|agents|claude|all] [--with-pointers] [--skip-mcp]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -13,6 +13,7 @@ TEMPLATES_DIR="${REPO_ROOT}/templates"
 TARGET_DIR="."
 HARNESS="auto"
 WITH_POINTERS=false
+SKIP_MCP=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -24,8 +25,12 @@ while [[ $# -gt 0 ]]; do
       WITH_POINTERS=true
       shift
       ;;
+    --skip-mcp)
+      SKIP_MCP=true
+      shift
+      ;;
     -h|--help)
-      echo "Usage: $0 [TARGET_DIR] [--harness auto|agents|claude|all] [--with-pointers]"
+      echo "Usage: $0 [TARGET_DIR] [--harness auto|agents|claude|all] [--with-pointers] [--skip-mcp]"
       exit 0
       ;;
     *)
@@ -93,6 +98,9 @@ else
   echo "[SKIP] .gitignore already exists"
   if ! grep -qE '^\s*\.env\b' "${TARGET_ROOT}/.gitignore"; then
     echo "[WARN] .gitignore exists but does not explicitly ignore '.env'. Review it before committing." >&2
+  fi
+  if ! grep -qE '^\s*\.private-journal/?\s*$' "${TARGET_ROOT}/.gitignore"; then
+    echo "[WARN] .gitignore exists but does not ignore '.private-journal/'. Add it to avoid committing local journal caches." >&2
   fi
 fi
 
@@ -165,6 +173,88 @@ if [ "$WITH_POINTERS" = true ]; then
     cp "${TEMPLATES_DIR}/CLAUDE.md.template" "${TARGET_ROOT}/CLAUDE.md"
     echo "[CREATED] CLAUDE.md pointer"
   fi
+fi
+
+merge_mcp_config() {
+  local tpl_path="$1"
+  local dest_path="$2"
+  mkdir -p "$(dirname "$dest_path")"
+
+  if [ ! -f "$dest_path" ]; then
+    cp "$tpl_path" "$dest_path"
+    echo "[CREATED] MCP config -> ${dest_path}"
+    return
+  fi
+
+  local tpl_native="$tpl_path"
+  local dest_native="$dest_path"
+  if command -v cygpath >/dev/null 2>&1; then
+    tpl_native="$(cygpath -m "$tpl_path")"
+    dest_native="$(cygpath -m "$dest_path")"
+  fi
+
+  if command -v node >/dev/null 2>&1; then
+    node -e '
+      const fs = require("fs");
+      const [tplFile, destFile] = process.argv.slice(1);
+      const tpl = JSON.parse(fs.readFileSync(tplFile, "utf8"));
+      const raw = fs.readFileSync(destFile, "utf8").replace(/^\uFEFF/, "");
+      const dest = raw.trim() ? JSON.parse(raw) : {};
+      if (!dest.mcpServers || typeof dest.mcpServers !== "object" || Array.isArray(dest.mcpServers)) {
+        dest.mcpServers = {};
+      }
+      const added = [];
+      for (const [k, v] of Object.entries(tpl.mcpServers || {})) {
+        if (!Object.prototype.hasOwnProperty.call(dest.mcpServers, k)) {
+          dest.mcpServers[k] = v;
+          added.push(k);
+        }
+      }
+      if (added.length > 0) {
+        fs.writeFileSync(destFile, JSON.stringify(dest, null, 2) + "\n", "utf8");
+        console.log("[MERGED] Added MCP servers (" + added.join(", ") + ") -> " + destFile);
+      } else {
+        console.log("[SKIP] MCP config already contains all workflow servers -> " + destFile);
+      }
+    ' "$tpl_native" "$dest_native" || echo "[WARN] Could not merge '${dest_path}'. Manually merge '${tpl_path}'." >&2
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -c '
+import json, sys
+tpl_file, dest_file = sys.argv[1], sys.argv[2]
+with open(tpl_file, "r", encoding="utf-8-sig") as f:
+    tpl = json.load(f)
+with open(dest_file, "r", encoding="utf-8-sig") as f:
+    raw = f.read().strip()
+dest = json.loads(raw) if raw else {}
+if not isinstance(dest.get("mcpServers"), dict):
+    dest["mcpServers"] = {}
+added = []
+for k, v in (tpl.get("mcpServers") or {}).items():
+    if k not in dest["mcpServers"]:
+        dest["mcpServers"][k] = v
+        added.append(k)
+if added:
+    with open(dest_file, "w", encoding="utf-8") as f:
+        json.dump(dest, f, indent=2)
+        f.write("\n")
+    print("[MERGED] Added MCP servers (" + ", ".join(added) + ") -> " + dest_file)
+else:
+    print("[SKIP] MCP config already contains all workflow servers -> " + dest_file)
+' "$tpl_native" "$dest_native" || echo "[WARN] Could not merge '${dest_path}'. Manually merge '${tpl_path}'." >&2
+  else
+    echo "[WARN] Neither node nor python3 found to auto-merge JSON. Manually merge '${tpl_path}' into '${dest_path}'." >&2
+  fi
+}
+
+# 5. Global Antigravity MCP config (+ project .mcp.json when Claude harness is active)
+if [ "$SKIP_MCP" = false ]; then
+  MCP_TEMPLATE="${TEMPLATES_DIR}/mcp_config.json.template"
+  merge_mcp_config "$MCP_TEMPLATE" "${HOME}/.gemini/config/mcp_config.json"
+  if [ "$install_claude" = true ]; then
+    merge_mcp_config "$MCP_TEMPLATE" "${TARGET_ROOT}/.mcp.json"
+  fi
+else
+  echo "[SKIP] MCP config installation skipped (--skip-mcp)"
 fi
 
 echo ""

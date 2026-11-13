@@ -33,6 +33,7 @@ What the installer does:
 1. Installs/updates all 42 skills into `.agents/skills/` (and `.claude/skills/` when detected or `-Harness all`) without removing existing project-specific skills.
 2. Checks the 4 root files (`.gitignore`, `README.md`, `GEMINI.md`, `PROGRESS.md`) and creates any missing ones.
 3. Never overwrites existing `.gitignore`, `README.md`, or `PROGRESS.md`. If `GEMINI.md` already exists, safely inserts/updates only the `<!-- skill-workflow-ai:start -->` ... `<!-- skill-workflow-ai:end -->` block.
+4. Non-destructively merges `playwright` (`@playwright/mcp@latest`), `private-journal` (`github:obra/private-journal-mcp`), and `context7` (`@upstash/context7-mcp@latest`) into global `~/.gemini/config/mcp_config.json` (and `.mcp.json` when Claude harness is active) without overwriting existing MCP servers or API keys. Pass `-SkipMcp` / `--skip-mcp` to skip MCP setup.
 
 ## Step 3: Populate Project Context (Without Bulk-Reading `.md` Docs)
 
@@ -44,9 +45,12 @@ What the installer does:
 ## Step 4: Clean Up & Verify
 
 1. Remove `$tmp`.
-2. Check `git status` (warn if an existing `.gitignore` lacks `.env` or secret ignores).
-3. From the next turn onward, follow `GEMINI.md` and `PROGRESS.md` strictly:
+2. Check `git status` (warn if an existing `.gitignore` lacks `.env` or `.private-journal/` ignores).
+3. Verify Node.js (`npx`) is available so `playwright`, `private-journal`, and `context7` MCP servers can launch cleanly (optional: add `"--api-key", "<KEY>"` to `context7` args in `~/.gemini/config/mcp_config.json` for higher rate limits).
+4. From the next turn onward, follow `GEMINI.md` and `PROGRESS.md` strictly:
    - Read ONLY `GEMINI.md` and `PROGRESS.md` on session start.
-   - Auto-run `obra/superpowers` (`using-superpowers` -> `brainstorming` -> `writing-plans` -> `subagent-driven-development` -> `test-driven-development` -> `verification-before-completion`).
+   - Call `context7` before writing external library integration code (`"Luôn gọi Context7 để tra cứu API trước khi viết code tích hợp thư viện ngoài"`).
+   - Auto-run `obra/superpowers` (`using-superpowers` -> `brainstorming` -> `writing-plans` -> `subagent-driven-development` -> `test-driven-development` -> `verification-before-completion`, including `playwright` MCP checks for web/UI changes).
+   - Query/record cross-project insights via `private-journal` MCP (`search_journal` / `process_thoughts`).
    - Run `mattpocock/skills` ONLY on explicit manual chat triggers: `"quy trinh moi"` (`grill-with-docs`), `"nghi ngoi"` (`handoff`), `"cau hinh"` (`wizard`).
 
